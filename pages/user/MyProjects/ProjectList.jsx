@@ -63,11 +63,11 @@ export default function ProjectList() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f0] p-6 md:p-8 space-y-6">
-      
+
       {/* ✅ Top Reusable Page Header (SearchBar + Notifications + Avatar) */}
-      <PageHeader 
-        searchQuery={searchQuery} 
-        setSearchQuery={setSearchQuery} 
+      <PageHeader
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
         placeholder="Search projects by name, tags..."
       />
 
@@ -82,7 +82,7 @@ export default function ProjectList() {
       {/* Projects Grid */}
       <div className="max-w-7xl mx-auto">
         {filteredProjects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
             {filteredProjects.map((project) => (
               <ProjectCard
                 key={project.id}

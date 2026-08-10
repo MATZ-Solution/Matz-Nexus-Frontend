@@ -15,7 +15,7 @@ export default function Layout() {
         <Sidebar />
 
         {/* Dynamic Main Content Area */}
-        <main className="flex-1 overflow-y-auto bg-white p-8 relative z-10 pointer-events-auto">
+        <main className=" overflow-y-auto bg-white p-8 relative ">
           <Outlet />
         </main>
       </div>

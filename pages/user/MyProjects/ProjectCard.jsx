@@ -1,3 +1,4 @@
+// ProjectCard.jsx
 import React from 'react';
 
 const statusStyles = {
@@ -23,10 +24,10 @@ export const ProjectCard = ({
   return (
     <div
       onClick={() => onCardClick && onCardClick(id)}
-      className="group flex flex-col justify-between h-auto min-h-[160px] bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:border-gray-300 transition-all cursor-pointer"
+      className="group flex flex-col h-[240px] bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:border-gray-300 transition-all cursor-pointer"
     >
       <div className="flex items-start justify-between gap-3 mb-3">
-        <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+        <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 min-h-[3.5rem]">
           {title}
         </h3>
         <span className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${currentStatus.badgeClass}`}>
@@ -34,15 +35,13 @@ export const ProjectCard = ({
         </span>
       </div>
 
-      {description && (
-        <p className="text-sm text-gray-600 leading-relaxed mb-4 flex-grow break-words">
-          {description}
-        </p>
-      )}
+      <p className="text-sm text-gray-600 leading-relaxed mb-4 line-clamp-3 flex-1">
+        {description || '\u00A0'}
+      </p>
 
       <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-gray-100 text-xs text-gray-500 mt-auto">
         {tags.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 max-h-[22px] overflow-hidden">
             {tags.map((tag, index) => (
               <span key={index} className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-[11px] font-medium">
                 #{tag}
@@ -51,11 +50,10 @@ export const ProjectCard = ({
           </div>
         ) : <div />}
 
-        {updatedAt && <span className="text-gray-400">Updated {updatedAt}</span>}
+        {updatedAt && <span className="text-gray-400 whitespace-nowrap">Updated {updatedAt}</span>}
       </div>
     </div>
   );
 };
 
-// Default Export added for safety
 export default ProjectCard;
