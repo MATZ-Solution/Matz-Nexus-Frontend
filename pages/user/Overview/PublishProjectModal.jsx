@@ -157,21 +157,19 @@ const PublishProjectModal = ({ isOpen, onClose }) => {
         onClick={(e) => e.stopPropagation()} 
        className="relative bg-white w-full max-w-4xl rounded-3xl shadow-2xl border border-slate-100 overflow-hidden max-h-[95vh] flex flex-col z-10"
       >
-        {/* Header */}
         <div className="px-8 pt-6 pb-3 flex items-center justify-between border-b border-slate-100 bg-white">
           <h2 className="text-xl font-bold text-slate-800">Publish a project</h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-xs font-semibold text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+            className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
           >
-            Close
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Scrollable Form Area */}
         <div className="p-8 overflow-y-auto space-y-6 flex-1">
-          <div className="flex items-start justify-between">
+          <div className="flex items-start">
             <div>
               <span className="text-[11px] font-bold text-[#0f9f59] uppercase tracking-wider block">
                 PUBLISH A PROJECT
@@ -183,13 +181,6 @@ const PublishProjectModal = ({ isOpen, onClose }) => {
                 Start with the essentials. You can enrich your project as it evolves.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5 pt-2">

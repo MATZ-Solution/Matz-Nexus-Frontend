@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import ProjectGrid from '../../../src/components/Cards/ProjectGrid';
 import PublishProjectModal from './PublishProjectModal';
-// Agar "components/Cards" folder me hai:
 import ProjectDetailCard from '../../../src/components/shared/ProjectDetailCard';
 
 const Overview = () => {
@@ -23,9 +22,6 @@ const Overview = () => {
     setIsModalOpen(false);
   };
 
-  // -------------------------------------------------------------
-  // 1. IF PROJECT IS SELECTED -> DISPLAY DETAILED SCREEN
-  // -------------------------------------------------------------
   if (selectedProject) {
     return (
       <div className="w-full max-w-7xl mx-auto space-y-8 font-sans pb-10 relative">
@@ -34,7 +30,6 @@ const Overview = () => {
           onBackToProjects={() => setSelectedProject(null)} 
         />
 
-        {/* Modal Call (Detail screen se bhi modal call ke liye) */}
         <PublishProjectModal 
           isOpen={isModalOpen} 
           onClose={handleCloseModal} 
@@ -42,10 +37,6 @@ const Overview = () => {
       </div>
     );
   }
-
-  // -------------------------------------------------------------
-  // 2. MAIN OVERVIEW DASHBOARD VIEW
-  // -------------------------------------------------------------
   return (
     <div className="w-full max-w-7xl mx-auto space-y-8 font-sans pb-10 relative">
       
@@ -75,24 +66,21 @@ const Overview = () => {
         </button>
       </div>
 
-      {/* Hero Cards Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         
-        {/* Main Green Banner */}
         <div 
           style={{ backgroundColor: '#0f9f59', borderRadius: '24px' }}
           className="lg:col-span-2 text-white p-8 flex flex-col justify-between items-start min-h-[220px] shadow-sm relative z-10"
         >
-          <div className="space-y-2">
+          <div className="space-y-3">
             <p className="text-xs text-emerald-100 font-medium">
-              Good morning, Jordan
+              Good morning, Amara Osei
             </p>
             <h2 className="text-2xl lg:text-3xl font-bold leading-snug max-w-md tracking-normal">
               Build what matters with the right people.
             </h2>
           </div>
 
-          {/* Start Project Button */}
           <button 
             type="button"
             onClick={handleOpenModal}
@@ -103,19 +91,18 @@ const Overview = () => {
           </button>
         </div>
 
-        {/* Your Ecosystem Stat Box */}
         <div 
           style={{ borderRadius: '24px' }}
-          className="bg-white p-8 border border-slate-200/80 flex flex-col justify-between shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] min-h-[220px]"
+          className="bg-white p-8 border border-slate-200/80 flex flex-col justify-center items-start shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] min-h-[220px] space-y-4"
         >
           <span className="text-xs font-medium text-slate-400">
             Your ecosystem
           </span>
-          <div>
+          <div className="space-y-2">
             <span className="text-5xl font-bold text-slate-900 block leading-none">
               4
             </span>
-            <p className="text-xs text-slate-400 mt-2 font-medium">
+            <p className="text-xs text-slate-400 font-medium">
               projects to explore
             </p>
           </div>
@@ -123,7 +110,6 @@ const Overview = () => {
 
       </div>
 
-      {/* Recommended Projects Section */}
       <div className="pt-2">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-bold text-slate-900">
@@ -132,17 +118,15 @@ const Overview = () => {
           <button 
             type="button"
             style={{ color: '#0f9f59' }}
-            className="text-xs font-semibold hover:underline cursor-pointer bg-transparent border-none"
+            className="text-xs font-semibold hover:underline cursor-pointer bg-transparent border-none p-0"
           >
             View all
           </button>
         </div>
 
-        {/* Project Grid passing click handler */}
         <ProjectGrid onSelectProject={(project) => setSelectedProject(project)} />
       </div>
 
-      {/* Modal Call */}
       <PublishProjectModal 
         isOpen={isModalOpen} 
         onClose={handleCloseModal} 

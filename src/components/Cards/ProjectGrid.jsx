@@ -22,6 +22,16 @@ const ProjectGrid = ({ onSelectProject }) => {
       stage: 'MVP',
       country: 'Kenya',
       match: 88
+    },
+    {
+      id: 3,
+      category: 'Education',
+      title: 'LearnLink',
+      description: 'Connecting underserved students with quality tutors and digital learning resources.',
+      tags: ['Education', 'EdTech', 'Community'],
+      stage: 'Early Revenue',
+      country: 'India',
+      match: 82
     }
   ];
 
