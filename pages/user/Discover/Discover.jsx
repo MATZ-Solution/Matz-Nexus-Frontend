@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Search } from 'lucide-react';
 
-// All verified relative imports:
+// Relative imports:
 import ProjectGrid from '../../../src/components/Cards/ProjectGrid';
 import ProjectDetailCard from '../../../src/components/shared/ProjectDetailCard';
-import FilterDropdown from '../../../src/components/Cards/FilterDropdown'; // Fixed to Cards
+import FilterDropdown from '../../../src/components/Cards/FilterDropdown';
 import PublishProjectModal from '../Overview/PublishProjectModal';
 
 const Discover = () => {
@@ -12,6 +12,22 @@ const Discover = () => {
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All projects');
+
+  const [savedProjectIds, setSavedProjectIds] = useState(() => {
+    const saved = localStorage.getItem('nexus_saved_projects');
+    return saved ? JSON.parse(saved) : [1];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('nexus_saved_projects', JSON.stringify(savedProjectIds));
+  }, [savedProjectIds]);
+
+  const handleToggleSave = (project) => {
+    const id = typeof project === 'object' ? project.id : project;
+    setSavedProjectIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
 
   const categories = [
     'All projects',
@@ -21,20 +37,20 @@ const Discover = () => {
     'Fintech',
   ];
 
-  // 1. IF PROJECT IS SELECTED -> DISPLAY DETAILED SCREEN
   if (selectedProject) {
     return (
       <ProjectDetailCard
         project={selectedProject}
         onBackToProjects={() => setSelectedProject(null)}
+        isSaved={savedProjectIds.includes(selectedProject.id)}
+        onToggleSave={() => handleToggleSave(selectedProject.id)}
       />
     );
   }
 
-  // 2. MAIN DISCOVER VIEW
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 font-sans pb-10">
-      
+
       {/* Header Section */}
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -49,7 +65,6 @@ const Discover = () => {
           </p>
         </div>
 
-        {/* Action Button */}
         <button
           type="button"
           onClick={() => setIsPublishModalOpen(true)}
@@ -80,19 +95,28 @@ const Discover = () => {
 
         <div className="w-full sm:w-48 shrink-0">
           <FilterDropdown
+            label="All projects"
             options={categories}
-            selectedOption={selectedCategory}
-            onSelect={(category) => setSelectedCategory(category)}
+            selectedValue={selectedCategory === 'All projects' ? '' : selectedCategory}
+            onSelect={(category) => setSelectedCategory(category || 'All projects')}
           />
         </div>
       </div>
 
-      {/* Projects Grid */}
-      <ProjectGrid 
+      {/*
+        FIX: searchQuery and selectedCategory are now actually passed down
+        to ProjectGrid. Previously these were tracked in state but never
+        given to the grid, so typing in the search box or picking a filter
+        had zero effect on what was shown.
+      */}
+      <ProjectGrid
         onSelectProject={(project) => setSelectedProject(project)}
+        savedProjectIds={savedProjectIds}
+        onToggleSave={handleToggleSave}
+        searchQuery={searchQuery}
+        selectedCategory={selectedCategory}
       />
 
-      {/* Publish Project Modal */}
       <PublishProjectModal
         isOpen={isPublishModalOpen}
         onClose={() => setIsPublishModalOpen(false)}

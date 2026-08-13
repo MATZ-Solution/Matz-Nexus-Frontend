@@ -13,33 +13,33 @@ import Dashboard from "../pages/user/Dashboard/Dashboard.jsx";
 import Messages from "../pages/user/Messages/Messages.jsx";
 import Profile from "../pages/user/Profile/Profile.jsx";
 import Notifications from "../pages/user/Notifications/Notifications.jsx";
+import CollaborationRequests from "../pages/user/CollaborationRequests/CollaborationRequests.jsx";
+import AdminOverview from "../pages/user/AdminOverview.jsx/AdminOverview.jsx";
+import SavedProjects from "../pages/user/SavedProjects/SavedProjects.jsx";
 
-// Standalone Test Screen
-import TestModal from "../pages/user/Overview/TestModal.jsx"; 
-
-function App() {
+export default function App() {
   return (
     <Routes>
       {/* Auth Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
-      {/* Standalone Route */}
-      <Route path="/test-modal" element={<TestModal />} />
+      {/* 🟢 Admin Route (Layout/Sidebar se BAHAR nikal diya hai) */}
+      <Route path="/admin" element={<AdminOverview />} />
 
-      {/* Main App Layout */}
+      {/* 🟢 Main App Layout (Yeh saare sidebar wale pages hain) */}
       <Route element={<Layout />}>
         <Route path="/" element={<Overview />} />
         <Route path="/overview" element={<Overview />} />
         <Route path="/discover" element={<Discover />} />
         <Route path="/my-projects" element={<ProjectList />} />
+        <Route path="/saved-projects" element={<SavedProjects />} />
+        <Route path="/requests" element={<CollaborationRequests />} />
         <Route path="/dashboard" element={<Dashboard />} /> 
         <Route path="/messages" element={<Messages />} />
-        <Route path="/profile" element={<Profile />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
     </Routes>
   );
 }
-
-export default App;

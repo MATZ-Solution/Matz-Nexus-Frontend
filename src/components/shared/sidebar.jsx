@@ -13,11 +13,9 @@ import {
   Lock
 } from 'lucide-react';
 
-const Sidebar = () => {
+const Sidebar = () => { 
   const navigate = useNavigate();
   const location = useLocation();
-
-  const user = { name: "Jordan Smith" };
 
   const navItems = [
     { name: 'Overview', icon: LayoutDashboard, path: '/' },
@@ -26,15 +24,20 @@ const Sidebar = () => {
     { name: 'Saved Projects', icon: Bookmark, path: '/saved-projects' },
     { name: 'Collaboration Requests', icon: Users, path: '/requests', badge: 2 },
     { name: 'Messages', icon: MessageSquare, path: '/messages', badge: 3 },
-    { name: 'Notifications', icon: Bell, path: '/notifications', badge: 4 },
+    // { name: 'Notifications', icon: Bell, path: '/notifications', badge: 4 },
     { name: 'Profile Overview', icon: User, path: '/profile' },
   ];
+
+  // Admin route exact match logic
+  const isAdminActive = location.pathname === '/admin';
 
   return (
     <aside className="w-60 bg-white text-slate-700 min-h-screen flex flex-col justify-between p-4 select-none border-r border-slate-100 shrink-0 font-sans">
       <div className="flex flex-col flex-1">
+        
+        {/* Logo & Header */}
         <div className="flex items-center gap-3 px-2 py-4 mb-4">
-          <div className="w-9 h-9 rounded-xl bg-[#0f9f59] flex items-center justify-center text-white shadow-sm shadow-emerald-200">
+          <div className="w-9 h-9 rounded-xl bg-[#0f9f59] flex items-center justify-center text-white shadow-xs shadow-emerald-200">
             <Sparkles className="w-5 h-5 fill-white/20" />
           </div>
           <div className="flex flex-col">
@@ -43,6 +46,7 @@ const Sidebar = () => {
           </div>
         </div>
 
+        {/* Main Navigation Items */}
         <nav className="space-y-0.5">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -74,15 +78,22 @@ const Sidebar = () => {
           })}
         </nav>
 
+        {/* Admin Console Navigation Item */}
         <div className="mt-6 pt-4 border-t border-slate-100">
           <button
-            onClick={() => navigate('/admin/overview')}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all cursor-pointer"
+            type="button"
+            onClick={() => navigate('/admin')}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
+              isAdminActive
+                ? 'bg-[#e6f4ea] text-[#0f9f59] font-semibold'
+                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+            }`}
           >
-            <Lock className="w-4.5 h-4.5 text-slate-400" />
+            <Lock className={`w-4.5 h-4.5 ${isAdminActive ? 'text-[#0f9f59]' : 'text-slate-400'}`} />
             <span>Admin console</span>
           </button>
         </div>
+
       </div>
     </aside>
   );

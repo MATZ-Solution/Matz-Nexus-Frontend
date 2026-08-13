@@ -1,89 +1,53 @@
 import React, { useState } from 'react';
-
-// ✅ New PageHeader Import (Replaces raw SearchBar)
-import PageHeader from "../../../src/components/shared/PageHeader.jsx";
-
-// ProjectCard Import
-import { ProjectCard } from "./ProjectCard.jsx";
-
-const initialProjects = [
-  {
-    id: '1',
-    title: 'Solar Grid Mesh',
-    description: 'Decentralized solar energy distribution system with smart monitoring.',
-    status: 'published',
-    tags: ['Energy', 'IoT'],
-    updatedAt: '2 days ago',
-  },
-  {
-    id: '2',
-    title: 'Aphasia Labs',
-    description: 'Short description here.',
-    status: 'pending_review',
-    tags: ['HealthTech'],
-    updatedAt: 'Yesterday',
-  },
-  {
-    id: '3',
-    title: 'Turkana Water ATM',
-    description: 'Automated clean water dispensing kiosk with prepaid smart cards and remote telemetry for rural regions.',
-    status: 'changes_requested',
-    tags: ['Water', 'CleanTech', 'Hardware'],
-    updatedAt: 'Just now',
-  },
-  {
-    id: '4',
-    title: 'Clinic Cold-Chain Sensor',
-    description: 'Real-time temperature tracking for vaccine storage.',
-    status: 'pending',
-    tags: ['Medical'],
-    updatedAt: '3 days ago',
-  },
-  {
-    id: '5',
-    title: 'Community Radio Kit',
-    description: 'Low-cost transmitter hardware package.',
-    status: 'rejected',
-    tags: ['Telecom'],
-    updatedAt: '1 week ago',
-  },
-];
+import PublishProjectModal from './PublishProjectModal.jsx';
+import { ProjectCard } from './ProjectCard.jsx';
+import { Sparkles } from 'lucide-react';
 
 export default function ProjectList() {
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredProjects = initialProjects.filter((project) => {
-    const query = searchQuery.toLowerCase();
-    const matchesTitle = project.title.toLowerCase().includes(query);
-    const matchesDesc = project.description?.toLowerCase().includes(query);
-    const matchesTags = project.tags?.some((tag) => tag.toLowerCase().includes(query));
-
-    return matchesTitle || matchesDesc || matchesTags;
-  });
+  const [projects, setProjects] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#f5f5f0] p-6 md:p-8 space-y-6">
+    <div className="min-h-screen bg-white p-6 md:p-8 space-y-8 font-sans">
+      
+      {/* 🟢 Main Title & Header Banner */}
+      <div className="flex items-start justify-between gap-4 pt-1">
+        <div className="space-y-1">
+          <span className="text-[11px] font-extrabold text-[#0f9f59] tracking-wider uppercase">
+            PROJECT NEXUS
+          </span>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+            My Projects
+          </h1>
+          <p className="text-sm text-gray-500 font-normal">
+            Your workspace for building meaningful things.
+          </p>
+        </div>
 
-      {/* ✅ Top Reusable Page Header (SearchBar + Notifications + Avatar) */}
-      <PageHeader
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        placeholder="Search projects by name, tags..."
-      />
-
-      {/* Page Heading Section */}
-      <div className="max-w-7xl mx-auto pt-2">
-        <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Manage and view your project statuses.
-        </p>
+        {/* Top Right Green Publish Project Button */}
+        <button
+          onClick={() => setIsModalOpen(true)}
+          style={{ backgroundColor: '#00a664', color: '#ffffff' }}
+          className="text-sm font-semibold px-5 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer shadow-sm active:scale-95"
+        >
+          <span className="text-lg leading-none font-normal">+</span>
+          <span>Publish project</span>
+        </button>
       </div>
 
-      {/* Projects Grid */}
-      <div className="max-w-7xl mx-auto">
-        {filteredProjects.length > 0 ? (
+      {/* 🟢 Sub-section Header */}
+      <div className="space-y-5 pt-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-gray-900">My projects</h2>
+          <button className="text-sm font-semibold text-[#0f9f59] hover:text-[#00a664] cursor-pointer transition-colors">
+            View all
+          </button>
+        </div>
+
+        {/* 🟢 Project Cards Grid / Empty Shelf View */}
+        {projects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-            {filteredProjects.map((project) => (
+            {projects.map((project) => (
               <ProjectCard
                 key={project.id}
                 id={project.id}
@@ -97,11 +61,36 @@ export default function ProjectList() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
-            <p className="text-gray-500 text-sm">No projects found matching "{searchQuery}"</p>
+          /* Empty Shelf View */
+          <div className="border border-dashed border-gray-200 rounded-2xl bg-white p-12 text-center flex flex-col items-center justify-center space-y-4 min-h-[300px]">
+            <div className="w-10 h-10 rounded-full bg-emerald-50 text-[#0f9f59] flex items-center justify-center">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-gray-900">
+                Your project shelf is empty
+              </h3>
+              <p className="text-sm text-gray-500">
+                Publish an idea and invite collaborators to help it grow.
+              </p>
+            </div>
+            {/* Explore projects Button */}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              style={{ backgroundColor: '#00a664', color: '#ffffff' }}
+              className="text-sm font-semibold px-5 py-2.5 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer mt-2"
+            >
+              Explore projects
+            </button>
           </div>
         )}
       </div>
+
+      {/* 🟢 Publish Modal Component */}
+      <PublishProjectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
 
     </div>
   );

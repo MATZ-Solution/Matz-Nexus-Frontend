@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 
-const ProjectDetailCard = ({ project, onBackToProjects }) => {
-  const [isSaved, setIsSaved] = useState(project?.isSaved || false);
-
+const ProjectDetailCard = ({ project, onBackToProjects, isSaved, onToggleSave }) => {
   if (!project) return null;
 
   return (
@@ -75,10 +73,10 @@ const ProjectDetailCard = ({ project, onBackToProjects }) => {
 
           <button
             type="button"
-            onClick={() => setIsSaved(!isSaved)}
+            onClick={onToggleSave}
             className={`px-5 py-2.5 border text-xs font-semibold rounded-xl transition-all cursor-pointer ${
               isSaved
-                ? 'bg-slate-100 border-slate-200 text-slate-800'
+                ? 'bg-emerald-50 border-emerald-200 text-[#0f9f59]'
                 : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700'
             }`}
           >
