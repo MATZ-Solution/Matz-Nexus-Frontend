@@ -16,6 +16,7 @@ import Notifications from "../pages/user/Notifications/Notifications.jsx";
 import CollaborationRequests from "../pages/user/CollaborationRequests/CollaborationRequests.jsx";
 import AdminOverview from "../pages/user/AdminOverview.jsx/AdminOverview.jsx";
 import SavedProjects from "../pages/user/SavedProjects/SavedProjects.jsx";
+import HomePage from '../pages/Homepage/homepage.jsx';
 
 export default function App() {
   return (
@@ -23,13 +24,18 @@ export default function App() {
       {/* Auth Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      
+
+            <Route path="/" element={<HomePage />} />
+
+
 
       {/* 🟢 Admin Route (Layout/Sidebar se BAHAR nikal diya hai) */}
       <Route path="/admin" element={<AdminOverview />} />
 
       {/* 🟢 Main App Layout (Yeh saare sidebar wale pages hain) */}
       <Route element={<Layout />}>
-        <Route path="/" element={<Overview />} />
+        <Route path="/user" element={<Overview />} />
         <Route path="/overview" element={<Overview />} />
         <Route path="/discover" element={<Discover />} />
         <Route path="/my-projects" element={<ProjectList />} />
