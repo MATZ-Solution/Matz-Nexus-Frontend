@@ -18,6 +18,7 @@ import Notifications from "../pages/user/Notifications/Notifications.jsx";
 import CollaborationRequests from "../pages/user/CollaborationRequests/CollaborationRequests.jsx";
 import AdminOverview from "../pages/user/AdminOverview.jsx/AdminOverview.jsx";
 import SavedProjects from "../pages/user/SavedProjects/SavedProjects.jsx";
+import HomePage from '../pages/Homepage/homepage.jsx';
 
 export default function App() {
   return (
@@ -25,10 +26,33 @@ export default function App() {
       {/* 🔓 Public Auth Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      
 
+            <Route path="/" element={<HomePage />} />
+
+
+
+<<<<<<< HEAD
       {/* 🔴 ADMIN ONLY ROUTES (Role: 'admin') */}
       <Route element={<ProtectedRoutes allowedRoles={['admin']} />}>
         <Route path="/admin" element={<AdminOverview />} />
+=======
+      {/* 🟢 Admin Route (Layout/Sidebar se BAHAR nikal diya hai) */}
+      <Route path="/admin" element={<AdminOverview />} />
+
+      {/* 🟢 Main App Layout (Yeh saare sidebar wale pages hain) */}
+      <Route element={<Layout />}>
+        <Route path="/user" element={<Overview />} />
+        <Route path="/overview" element={<Overview />} />
+        <Route path="/discover" element={<Discover />} />
+        <Route path="/my-projects" element={<ProjectList />} />
+        <Route path="/saved-projects" element={<SavedProjects />} />
+        <Route path="/requests" element={<CollaborationRequests />} />
+        <Route path="/dashboard" element={<Dashboard />} /> 
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/profile" element={<Profile />} />
+>>>>>>> cf2a52fe1f7ee48551eab88620ea28cf8cd9ecf0
       </Route>
 
       {/* 🟢 USER ONLY ROUTES (Role: 'user') */}
