@@ -24,13 +24,6 @@ const Sidebar = () => {
     { name: 'Saved Projects', icon: Bookmark, path: '/saved-projects' },
     { name: 'Collaboration Requests', icon: Users, path: '/requests', badge: 2 },
     { name: 'Messages', icon: MessageSquare, path: '/messages', badge: 3 },
-<<<<<<< HEAD
-     { name: 'Login', icon: MessageSquare, path: '/login', badge: 3 },
-      { name: 'Signup', icon: MessageSquare, path: '/signup', badge: 3 },
-    // { name: 'Notifications', icon: Bell, path: '/notifications', badge: 4 },
-    { name: 'Profile Overview', icon: User, path: '/profile' },
-=======
->>>>>>> cf2a52fe1f7ee48551eab88620ea28cf8cd9ecf0
   ];
 
   // Admin route exact match logic
