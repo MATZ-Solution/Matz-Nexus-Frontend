@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bookmark } from 'lucide-react';
+import ProjectDetailCard from '../../../src/components/shared/ProjectDetailCard';
 
 const allSampleProjects = [
   {
@@ -35,6 +36,8 @@ const allSampleProjects = [
 ];
 
 export default function SavedProjects() {
+  const [selectedProject, setSelectedProject] = useState(null);
+
   const [savedProjectIds, setSavedProjectIds] = useState(() => {
     const saved = localStorage.getItem('nexus_saved_projects');
     return saved ? JSON.parse(saved) : [1]; 
@@ -44,7 +47,8 @@ export default function SavedProjects() {
     localStorage.setItem('nexus_saved_projects', JSON.stringify(savedProjectIds));
   }, [savedProjectIds]);
 
-  const handleToggleSave = (id) => {
+  const handleToggleSave = (projectOrId) => {
+    const id = typeof projectOrId === 'object' ? projectOrId.id : projectOrId;
     setSavedProjectIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
@@ -54,11 +58,20 @@ export default function SavedProjects() {
     savedProjectIds.includes(p.id)
   );
 
+  // 🟢 Agar koi project click hua hai to Detail Screen dikhao
+  if (selectedProject) {
+    return (
+      <ProjectDetailCard
+        project={selectedProject}
+        onBackToProjects={() => setSelectedProject(null)}
+        isSaved={savedProjectIds.includes(selectedProject.id)}
+        onToggleSave={() => handleToggleSave(selectedProject.id)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white font-sans">
-      
-   
-
       <div className="p-8 md:p-10 space-y-8 max-w-7xl">
         {/* Header Title Block */}
         <div className="space-y-1">
@@ -86,7 +99,8 @@ export default function SavedProjects() {
                 return (
                   <div
                     key={project.id}
-                    className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-5"
+                    onClick={() => setSelectedProject(project)}
+                    className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-5 cursor-pointer group"
                   >
                     {/* Card Top: Category Badge & Bookmark Icon */}
                     <div className="flex items-center justify-between">
@@ -94,8 +108,12 @@ export default function SavedProjects() {
                         {project.category}
                       </span>
                       <button
-                        onClick={() => handleToggleSave(project.id)}
-                        className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation(); // 🟢 Detail view open sharpen hone se rokne ke liye
+                          handleToggleSave(project.id);
+                        }}
+                        className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer p-1"
                         title={isSaved ? "Remove from saved" : "Save project"}
                       >
                         <Bookmark
@@ -108,7 +126,7 @@ export default function SavedProjects() {
 
                     {/* Card Body */}
                     <div className="space-y-2">
-                      <h3 className="text-lg font-bold text-slate-900">
+                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-[#00a664] transition-colors">
                         {project.title}
                       </h3>
                       <p className="text-xs text-slate-400 leading-relaxed">
@@ -148,7 +166,6 @@ export default function SavedProjects() {
           )}
         </div>
       </div>
-
     </div>
   );
 }

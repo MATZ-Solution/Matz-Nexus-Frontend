@@ -1,11 +1,13 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
+// 🟢 Components & Routes ('src' folder ke andar hain -> ./)
 import Layout from "./components/shared/layout.jsx";
 import Login from "./components/Auth/login.jsx";
 import Signup from "./components/Auth/Signup.jsx";
+import ProtectedRoutes from "./routes/ProtectedRoutes.jsx";
 
-// User Screens
+// 🔵 Pages ('src' ke baahar root level par hain -> ../)
 import Overview from "../pages/user/Overview/Overview.jsx"; 
 import Discover from "../pages/user/Discover/Discover.jsx";
 import ProjectList from "../pages/user/MyProjects/ProjectList.jsx";
@@ -20,26 +22,33 @@ import SavedProjects from "../pages/user/SavedProjects/SavedProjects.jsx";
 export default function App() {
   return (
     <Routes>
-      {/* Auth Routes */}
+      {/* 🔓 Public Auth Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
-      {/* 🟢 Admin Route (Layout/Sidebar se BAHAR nikal diya hai) */}
-      <Route path="/admin" element={<AdminOverview />} />
-
-      {/* 🟢 Main App Layout (Yeh saare sidebar wale pages hain) */}
-      <Route element={<Layout />}>
-        <Route path="/" element={<Overview />} />
-        <Route path="/overview" element={<Overview />} />
-        <Route path="/discover" element={<Discover />} />
-        <Route path="/my-projects" element={<ProjectList />} />
-        <Route path="/saved-projects" element={<SavedProjects />} />
-        <Route path="/requests" element={<CollaborationRequests />} />
-        <Route path="/dashboard" element={<Dashboard />} /> 
-        <Route path="/messages" element={<Messages />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/profile" element={<Profile />} />
+      {/* 🔴 ADMIN ONLY ROUTES (Role: 'admin') */}
+      <Route element={<ProtectedRoutes allowedRoles={['admin']} />}>
+        <Route path="/admin" element={<AdminOverview />} />
       </Route>
+
+      {/* 🟢 USER ONLY ROUTES (Role: 'user') */}
+      <Route element={<ProtectedRoutes allowedRoles={['user']} />}>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Overview />} />
+          <Route path="/overview" element={<Overview />} />
+          <Route path="/discover" element={<Discover />} />
+          <Route path="/my-projects" element={<ProjectList />} />
+          <Route path="/saved-projects" element={<SavedProjects />} />
+          <Route path="/requests" element={<CollaborationRequests />} />
+          <Route path="/dashboard" element={<Dashboard />} /> 
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/profile" element={<Profile />} />
+        </Route>
+      </Route>
+
+      {/* 🔄 Fallback route */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

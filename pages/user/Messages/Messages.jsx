@@ -114,8 +114,25 @@ export default function Messages() {
   };
 
   return (
-    <div className="h-[calc(100vh-96px)] flex items-stretch justify-center bg-gray-100 p-6">
-      <div className="w-full max-w-6xl bg-white rounded-2xl border border-gray-200/80 shadow-sm flex overflow-hidden">
+    <div className="w-full max-w-none px-14 space-y-8 font-sans pb-10 relative">
+      
+      {/* 🟢 Inline Header Block (Same as Overview.jsx) */}
+      <div className="flex items-start justify-between pt-4">
+        <div>
+          <span className="text-[11px] font-bold text-[#0f9f59] uppercase tracking-wider">
+            PROJECT NEXUS
+          </span>
+          <h1 className="text-4xl font-bold text-slate-900 mt-1">
+            Messages
+          </h1>
+          <p className="text-sm text-slate-400 mt-2">
+            Your workspace for building meaningful things.
+          </p>
+        </div>
+      </div>
+
+      {/* Main Chat Frame */}
+      <div className="w-full bg-white rounded-2xl border border-gray-200/80 shadow-sm flex overflow-hidden h-[calc(100vh-280px)] min-h-[520px]">
 
         {/* Conversations Sidebar */}
         <div className="w-[320px] border-r border-gray-200/80 flex flex-col shrink-0 bg-gray-50/40">
@@ -127,7 +144,7 @@ export default function Messages() {
               </p>
             </div>
 
-            {/* Search */}
+            {/* Search Input */}
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -191,7 +208,7 @@ export default function Messages() {
           </div>
         </div>
 
-        {/* Active Chat */}
+        {/* Active Chat Section */}
         <div className="flex-1 flex flex-col min-w-0">
 
           {/* Active Chat Header */}
@@ -207,10 +224,8 @@ export default function Messages() {
             </div>
           </div>
 
-          {/* Chat Messages List */}
+          {/* Chat Messages */}
           <div ref={scrollRef} className="flex-1 px-6 py-6 space-y-4 bg-[#fafafa] overflow-y-auto">
-
-            {/* Connected system tag */}
             <div className="flex justify-center mb-2">
               <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-medium px-3 py-1.5 rounded-full text-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
@@ -242,7 +257,7 @@ export default function Messages() {
             })}
           </div>
 
-          {/* Input & Send Button Section */}
+          {/* Send Input Form */}
           <form
             onSubmit={handleSendMessage}
             className="p-4 border-t border-gray-200/80 bg-white flex items-center gap-3 shrink-0"

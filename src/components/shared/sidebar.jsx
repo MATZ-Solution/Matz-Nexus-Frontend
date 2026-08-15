@@ -24,6 +24,8 @@ const Sidebar = () => {
     { name: 'Saved Projects', icon: Bookmark, path: '/saved-projects' },
     { name: 'Collaboration Requests', icon: Users, path: '/requests', badge: 2 },
     { name: 'Messages', icon: MessageSquare, path: '/messages', badge: 3 },
+     { name: 'Login', icon: MessageSquare, path: '/login', badge: 3 },
+      { name: 'Signup', icon: MessageSquare, path: '/signup', badge: 3 },
     // { name: 'Notifications', icon: Bell, path: '/notifications', badge: 4 },
     { name: 'Profile Overview', icon: User, path: '/profile' },
   ];
