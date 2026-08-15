@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Sparkles,
@@ -6,12 +6,7 @@ import {
   Search,
   Users,
   Rocket,
-  Lock,
   Bookmark,
-  X,
-  Mail,
-  Eye,
-  EyeOff,
 } from 'lucide-react';
 
 // ==========================================
@@ -69,111 +64,6 @@ const steps = [
 ];
 
 // ==========================================
-// LOGIN GATE MODAL
-// ==========================================
-const LoginGateModal = ({ isOpen, onClose, onSuccess, intent }) => {
-  const [showPassword, setShowPassword] = useState(false);
-
-  if (!isOpen) return null;
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSuccess();
-  };
-
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.55)',
-        backdropFilter: 'blur(6px)',
-        zIndex: 999999,
-      }}
-      className="flex items-center justify-center p-4"
-    >
-      <div className="absolute inset-0" onClick={onClose} />
-
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="relative bg-white w-full max-w-sm rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-10"
-      >
-        <div className="px-7 pt-7 pb-5 text-center border-b border-slate-100 bg-gradient-to-br from-emerald-50/70 via-white to-white relative">
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-          <div className="w-10 h-10 rounded-xl bg-[#0f9f59] flex items-center justify-center mx-auto mb-3 shadow-sm shadow-emerald-200">
-            <Lock className="w-5 h-5 text-white" />
-          </div>
-          <h3 className="text-lg font-bold text-slate-900">Sign in to continue</h3>
-          <p className="text-xs text-slate-400 mt-1">
-            {intent === 'publish'
-              ? 'Create an account to publish your project.'
-              : 'Log in to unlock the full workspace.'}
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-7 space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-2">Email</label>
-            <div className="relative">
-              <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
-              <input
-                type="email"
-                required
-                placeholder="you@example.com"
-                className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#0f9f59] focus:ring-2 focus:ring-emerald-100 transition-all"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-2">Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                placeholder="••••••••"
-                className="w-full pl-4 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#0f9f59] focus:ring-2 focus:ring-emerald-100 transition-all"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((p) => !p)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-              >
-                {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            style={{ backgroundColor: '#0f9f59' }}
-            className="w-full text-xs font-semibold text-white px-5 py-3 rounded-xl hover:opacity-90 shadow-sm shadow-emerald-200 cursor-pointer transition-opacity"
-          >
-            Continue
-          </button>
-
-          <p className="text-center text-[11px] text-slate-400">
-            New here?{' '}
-            <button type="button" className="text-[#0f9f59] font-semibold cursor-pointer">
-              Create an account
-            </button>
-          </p>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-// ==========================================
 // PROJECT CARD (reused on homepage)
 // ==========================================
 const ProjectCard = ({ project, onProtectedClick }) => (
@@ -216,17 +106,14 @@ const ProjectCard = ({ project, onProtectedClick }) => (
 // ==========================================
 export default function HomePage() {
   const navigate = useNavigate();
-  const [gateOpen, setGateOpen] = useState(false);
-  const [intent, setIntent] = useState('generic');
 
-  const requireAuth = (nextIntent = 'generic') => {
-    setIntent(nextIntent);
-    setGateOpen(true);
-  };
-
-  const handleLoginSuccess = () => {
-    setGateOpen(false);
-    navigate('/'); // lands back on the dashboard/overview after "login"
+  // NOTE: previously this opened a fake "LoginGateModal" that never checked
+  // real credentials and always navigated to '/'. That modal has been
+  // removed — every gated action now goes to the REAL /login page, which
+  // already has correct user/admin credential checking and redirects
+  // (user -> /overview, admin -> /admin).
+  const requireAuth = () => {
+    navigate('/login');
   };
 
   return (
@@ -250,7 +137,7 @@ export default function HomePage() {
           <a href="#how-it-works" className="hover:text-slate-900">
             How it works
           </a>
-          <button type="button" onClick={() => requireAuth('generic')} className="hover:text-slate-900 cursor-pointer">
+          <button type="button" onClick={requireAuth} className="hover:text-slate-900 cursor-pointer">
             Collaborators
           </button>
         </nav>
@@ -258,14 +145,14 @@ export default function HomePage() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => requireAuth('login')}
+            onClick={() => navigate('/login')}
             className="text-xs font-semibold text-slate-600 hover:text-slate-900 px-4 py-2.5 cursor-pointer"
           >
             Log in
           </button>
           <button
             type="button"
-            onClick={() => requireAuth('signup')}
+            onClick={() => navigate('/signup')}
             style={{ backgroundColor: '#0f9f59' }}
             className="text-xs font-semibold text-white px-4 py-2.5 rounded-xl hover:opacity-90 shadow-sm shadow-emerald-200 cursor-pointer transition-opacity"
           >
@@ -301,7 +188,7 @@ export default function HomePage() {
           </button>
           <button
             type="button"
-            onClick={() => requireAuth('publish')}
+            onClick={requireAuth}
             style={{ backgroundColor: '#0f9f59' }}
             className="flex items-center gap-2 text-sm font-semibold text-white px-6 py-3.5 rounded-xl hover:opacity-90 shadow-sm shadow-emerald-200 cursor-pointer transition-opacity"
           >
@@ -334,13 +221,13 @@ export default function HomePage() {
             <ProjectCard
               key={project.title}
               project={project}
-              onProtectedClick={() => requireAuth('save')}
+              onProtectedClick={requireAuth}
             />
           ))}
         </div>
 
         <p className="text-center text-xs text-slate-400 mt-8">
-          Free to browse. <button type="button" onClick={() => requireAuth('signup')} className="text-[#0f9f59] font-semibold cursor-pointer">Sign up</button> to save projects, message founders, or publish your own.
+          Free to browse. <button type="button" onClick={() => navigate('/signup')} className="text-[#0f9f59] font-semibold cursor-pointer">Sign up</button> to save projects, message founders, or publish your own.
         </p>
       </section>
 
@@ -385,7 +272,7 @@ export default function HomePage() {
           </p>
           <button
             type="button"
-            onClick={() => requireAuth('publish')}
+            onClick={requireAuth}
             className="mt-7 inline-flex items-center gap-2 bg-white text-[#0f9f59] text-sm font-semibold px-6 py-3.5 rounded-xl hover:opacity-90 cursor-pointer relative shadow-lg"
           >
             Publish your project
@@ -403,14 +290,6 @@ export default function HomePage() {
           <a href="#" className="hover:text-slate-600">Contact</a>
         </div>
       </footer>
-
-      {/* ================= LOGIN GATE ================= */}
-      <LoginGateModal
-        isOpen={gateOpen}
-        intent={intent}
-        onClose={() => setGateOpen(false)}
-        onSuccess={handleLoginSuccess}
-      />
     </div>
   );
 }
