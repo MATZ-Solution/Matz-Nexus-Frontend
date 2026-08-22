@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search } from 'lucide-react';
 
-// Relative imports:
+// Relative imports (Exact same as original):
 import ProjectGrid from '../../../src/components/Cards/ProjectGrid';
 import ProjectDetailCard from '../../../src/components/shared/ProjectDetailCard';
 import FilterDropdown from '../../../src/components/Cards/FilterDropdown';
@@ -12,6 +12,9 @@ const Discover = () => {
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All projects');
+
+  // Trigger state to refresh ProjectGrid when a new project is created in DB
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [savedProjectIds, setSavedProjectIds] = useState(() => {
     const saved = localStorage.getItem('nexus_saved_projects');
@@ -103,13 +106,9 @@ const Discover = () => {
         </div>
       </div>
 
-      {/*
-        FIX: searchQuery and selectedCategory are now actually passed down
-        to ProjectGrid. Previously these were tracked in state but never
-        given to the grid, so typing in the search box or picking a filter
-        had zero effect on what was shown.
-      */}
+      {/* Project Grid */}
       <ProjectGrid
+        key={refreshTrigger}
         onSelectProject={(project) => setSelectedProject(project)}
         savedProjectIds={savedProjectIds}
         onToggleSave={handleToggleSave}
@@ -117,9 +116,11 @@ const Discover = () => {
         selectedCategory={selectedCategory}
       />
 
+      {/* Publish Project Modal */}
       <PublishProjectModal
         isOpen={isPublishModalOpen}
         onClose={() => setIsPublishModalOpen(false)}
+        onProjectPublished={() => setRefreshTrigger((prev) => prev + 1)}
       />
 
     </div>

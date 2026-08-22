@@ -1,36 +1,70 @@
-import React, { useState } from 'react';
-import { Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import CollaborationRequestCard from './CollaborationRequestCard';
 
 export default function CollaborationRequests() {
-  const [requests, setRequests] = useState([
-    {
-      id: 'req-1',
-      senderName: 'Avery Chen',
-      actionText: 'wants to collaborate on',
-      targetName: 'OpenGrid Energy',
-    },
-    {
-      id: 'req-2',
-      senderName: 'Maya Patel',
-      actionText: 'invited you to review',
-      targetName: 'Mindful Campus',
-    },
-  ]);
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleAccept = (id) => {
-    setRequests((prev) => prev.filter((item) => item.id !== id));
+  // Safe LocalStorage Retrieval to prevent application crash
+  const [currentUserId] = useState(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      const parsed = stored ? JSON.parse(stored) : null;
+      return parsed?.id || 1; // Real logged-in user ID or fallback
+    } catch (error) {
+      console.error('Error parsing user from localStorage:', error);
+      return 1;
+    }
+  });
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/collaborations/incoming/${currentUserId}`);
+        if (response.data.success) {
+          setRequests(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching requests:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (currentUserId) {
+      fetchRequests();
+    }
+  }, [currentUserId]);
+
+  const handleAccept = async (id) => {
+    try {
+      const response = await axios.put(`http://localhost:5000/api/collaborations/accept/${id}`);
+      if (response.data.success) {
+        setRequests((prev) => prev.filter((item) => item.id !== id));
+      }
+    } catch (error) {
+      console.error('Error accepting request:', error);
+    }
   };
 
-  const handleDismiss = (id) => {
-    setRequests((prev) => prev.filter((item) => item.id !== id));
+  const handleDismiss = async (id) => {
+    try {
+      const response = await axios.put(`http://localhost:5000/api/collaborations/dismiss/${id}`);
+      if (response.data.success) {
+        setRequests((prev) => prev.filter((item) => item.id !== id));
+      }
+    } catch (error) {
+      console.error('Error dismissing request:', error);
+    }
   };
+
+  if (loading) {
+    return <div className="p-6 text-sm text-gray-500">Loading requests...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-white p-6 md:p-8 space-y-6 font-sans">
-
-
-
-      {/* Title Banner Section */}
       <div className="space-y-1 pt-1">
         <span className="text-[11px] font-extrabold text-emerald-600 tracking-wider uppercase">
           PROJECT NEXUS
@@ -43,7 +77,6 @@ export default function CollaborationRequests() {
         </p>
       </div>
 
-      {/* Subhead & Cards Section */}
       <div className="space-y-4 pt-2">
         <h2 className="text-lg font-bold text-gray-900">
           Collaboration requests
@@ -52,37 +85,12 @@ export default function CollaborationRequests() {
         {requests.length > 0 ? (
           <div className="space-y-3">
             {requests.map((request) => (
-              <div
+              <CollaborationRequestCard
                 key={request.id}
-                className="flex items-center justify-between p-4 px-6 border border-gray-200 rounded-2xl bg-white shadow-sm hover:border-gray-300 transition-all"
-              >
-                {/* Left Side: Sender & Project Details */}
-                <div className="text-sm text-gray-700 font-normal">
-                  <span className="font-bold text-gray-900">{request.senderName}</span>{' '}
-                  <span className="text-gray-600">{request.actionText}</span>{' '}
-                  <span className="font-bold text-gray-900">{request.targetName}</span>
-                </div>
-
-                {/* Right Side: Accept & Dismiss Buttons */}
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleAccept(request.id)}
-                    style={{ backgroundColor: '#00a664', color: '#ffffff' }}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer shadow-sm active:scale-95"
-                  >
-                    <Check className="w-3.5 h-3.5 stroke-[3]" />
-                    Accept
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDismiss(request.id)}
-                    className="px-3.5 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition cursor-pointer"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </div>
+                request={request}
+                onAccept={handleAccept}
+                onDismiss={handleDismiss}
+              />
             ))}
           </div>
         ) : (
@@ -91,7 +99,6 @@ export default function CollaborationRequests() {
           </div>
         )}
       </div>
-
     </div>
   );
 }

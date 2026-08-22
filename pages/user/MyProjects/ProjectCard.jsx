@@ -1,56 +1,64 @@
-// ProjectCard.jsx
-import React from 'react';
+import React, { useState } from 'react';
+import { Bookmark } from 'lucide-react';
 
-const statusStyles = {
-  published: { label: 'Published', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  pending: { label: 'Pending', badgeClass: 'bg-amber-50 text-amber-700 border-amber-200' },
-  pending_review: { label: 'Pending Review', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
-  draft: { label: 'Draft', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
-  changes_requested: { label: 'Changes Requested', badgeClass: 'bg-orange-50 text-orange-700 border-orange-200' },
-  rejected: { label: 'Rejected', badgeClass: 'bg-rose-50 text-rose-700 border-rose-200' },
-};
-
-export const ProjectCard = ({
-  id,
-  title,
-  description,
-  status = 'draft',
-  tags = [],
-  updatedAt,
-  onCardClick,
-}) => {
-  const currentStatus = statusStyles[status] || statusStyles.draft;
+export const ProjectCard = ({ project, onClick }) => {
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   return (
-    <div
-      onClick={() => onCardClick && onCardClick(id)}
-      className="group flex flex-col h-[240px] bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:border-gray-300 transition-all cursor-pointer"
+    <div 
+      onClick={onClick}
+      className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-5 group cursor-pointer"
     >
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 min-h-[3.5rem]">
-          {title}
+      <div>
+        {/* Top Header: Category Pill & Bookmark */}
+        <div className="flex items-center justify-between mb-4">
+          <span className="bg-emerald-50 text-[#0f9f59] text-xs font-medium px-3 py-1 rounded-full">
+            {project?.category || project?.industry || 'General'}
+          </span>
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsBookmarked(!isBookmarked);
+            }}
+            className="text-slate-400 hover:text-slate-700 transition-colors p-1 cursor-pointer"
+          >
+            <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-slate-700 text-slate-700' : ''}`} />
+          </button>
+        </div>
+
+        {/* Project Title */}
+        <h3 className="text-lg font-bold text-slate-900 group-hover:text-[#0f9f59] transition-colors mb-2">
+          {project?.title}
         </h3>
-        <span className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${currentStatus.badgeClass}`}>
-          {currentStatus.label}
-        </span>
-      </div>
 
-      <p className="text-sm text-gray-600 leading-relaxed mb-4 line-clamp-3 flex-1">
-        {description || '\u00A0'}
-      </p>
+        {/* Description */}
+        <p className="text-xs text-slate-500 leading-relaxed mb-4 line-clamp-3">
+          {project?.description}
+        </p>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-gray-100 text-xs text-gray-500 mt-auto">
-        {tags.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5 max-h-[22px] overflow-hidden">
-            {tags.map((tag, index) => (
-              <span key={index} className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-[11px] font-medium">
-                #{tag}
+        {/* Tag Chips */}
+        {project?.tags && project.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {project.tags.map((tag, idx) => (
+              <span key={idx} className="bg-slate-100/80 text-slate-600 text-[11px] px-2.5 py-1 rounded-lg font-medium">
+                {tag}
               </span>
             ))}
           </div>
-        ) : <div />}
+        )}
+      </div>
 
-        {updatedAt && <span className="text-gray-400 whitespace-nowrap">Updated {updatedAt}</span>}
+      {/* Bottom Footer */}
+      <div className="flex items-center justify-between pt-2 text-xs font-medium border-t border-slate-50">
+        <span className="text-slate-400">
+          {project?.stage || 'N/A'} · {project?.country || 'N/A'}
+        </span>
+        {project?.match && (
+          <span className="text-[#0f9f59] font-semibold">
+            {project.match}% match
+          </span>
+        )}
       </div>
     </div>
   );

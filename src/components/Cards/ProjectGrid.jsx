@@ -1,49 +1,61 @@
-import React from 'react';
-import { Bookmark } from 'lucide-react';
-
-const sampleProjects = [
-  {
-    id: 1,
-    category: 'Climate & Energy',
-    title: 'OpenGrid Energy',
-    description: 'Making renewable energy accessible to every community through an open, intelligent grid.',
-    tags: ['Energy', 'Climate', 'Open source'],
-    stage: 'Prototype',
-    location: 'United Kingdom',
-    match: 94,
-  },
-  {
-    id: 2,
-    category: 'Health & Wellness',
-    title: 'MediRoute',
-    description: 'A smarter way for remote communities to access preventative healthcare and local support.',
-    tags: ['Healthcare', 'Mobile', 'Impact'],
-    stage: 'MVP',
-    location: 'Kenya',
-    match: 88,
-  },
-  {
-    id: 3,
-    category: 'Education',
-    title: 'Classroom OS',
-    description: 'The collaborative workspace helping teachers make learning more personal for every student.',
-    tags: ['EdTech', 'SaaS', 'Teachers'],
-    stage: 'Early Revenue',
-    location: 'Canada',
-    match: 82,
-  },
-];
+import React, { useState, useEffect } from 'react';
+import { Bookmark, Loader2 } from 'lucide-react';
+import axios from 'axios';
 
 const ProjectGrid = ({
-  projects = sampleProjects,
-  isLoading = false,
   onSelectProject,
   onOpen,
   savedProjectIds = [],
   onToggleSave,
-  searchQuery = '',        // NEW: text typed into the search box
-  selectedCategory = 'All projects', // NEW: value from FilterDropdown
+  searchQuery = '',
+  selectedCategory = 'All projects',
 }) => {
+  const [projects, setProjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchProjects = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await axios.get('http://localhost:5000/api/projects');
+        
+        // 🟢 FIX: Handles both direct array [] and { success: true, data: [] } response formats
+        const rows = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+
+        // Normalize backend field names -> what the UI expects
+        const normalized = rows.map((p) => ({
+          ...p,
+          match: p.match ?? p.match_score ?? 0,
+          country: p.country ?? p.location ?? '',
+          tags: Array.isArray(p.tags)
+            ? p.tags
+            : (() => {
+                try {
+                  return JSON.parse(p.tags || '[]');
+                } catch {
+                  return [];
+                }
+              })(),
+        }));
+
+        if (isMounted) setProjects(normalized);
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        if (isMounted) setError('Could not load projects from server.');
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    fetchProjects();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSelect = (project) => {
     if (onSelectProject) onSelectProject(project);
@@ -52,14 +64,9 @@ const ProjectGrid = ({
 
   const handleBookmarkClick = (e, project) => {
     e.stopPropagation();
-    if (onToggleSave) {
-      onToggleSave(project);
-    }
+    if (onToggleSave) onToggleSave(project);
   };
 
-  // FIX: this is the actual filtering logic that was completely missing.
-  // Without this, the search box and the "All projects" dropdown had no
-  // effect at all — every project always rendered regardless of input.
   const filteredProjects = projects.filter((project) => {
     const matchesCategory =
       selectedCategory === 'All projects' || project.category === selectedCategory;
@@ -67,8 +74,8 @@ const ProjectGrid = ({
     const query = searchQuery.trim().toLowerCase();
     const matchesSearch =
       query === '' ||
-      project.title.toLowerCase().includes(query) ||
-      project.description.toLowerCase().includes(query) ||
+      (project.title || '').toLowerCase().includes(query) ||
+      (project.description || '').toLowerCase().includes(query) ||
       (project.tags || []).some((tag) => tag.toLowerCase().includes(query));
 
     return matchesCategory && matchesSearch;
@@ -83,6 +90,15 @@ const ProjectGrid = ({
             className="rounded-2xl border border-slate-200/60 bg-white p-6 h-64 animate-pulse min-w-0"
           />
         ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="border border-dashed border-red-200 rounded-2xl p-12 text-center text-sm text-red-400 bg-red-50/50 w-full flex flex-col items-center gap-2">
+        <Loader2 className="w-4 h-4 animate-spin opacity-0" />
+        {error}
       </div>
     );
   }
@@ -139,7 +155,7 @@ const ProjectGrid = ({
             </p>
 
             <div className="flex flex-wrap gap-2 mt-5 pt-5 border-t border-slate-100">
-              {project.tags.map((tag) => (
+              {(project.tags || []).map((tag) => (
                 <span
                   key={tag}
                   className="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full"
@@ -151,7 +167,7 @@ const ProjectGrid = ({
 
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100 gap-2">
               <span className="text-sm text-slate-400 truncate">
-                {project.stage} · {project.location}
+                {project.stage} · {project.country || project.location}
               </span>
               <span style={{ color: '#0f9f59' }} className="text-sm font-bold shrink-0">
                 {project.match}% match

@@ -4,58 +4,60 @@ import { Mail, Lock, Eye, EyeOff, User, ShieldCheck, ArrowRight } from 'lucide-r
 
 export default function Login({ onLoginSuccess }) {
   const navigate = useNavigate();
-  const [role, setRole] = useState('user');
-  const [email, setEmail] = useState('user@nexus.com');
-  const [password, setPassword] = useState('user123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleRoleChange = (selectedRole) => {
-    setRole(selectedRole);
-    setError('');
-    if (selectedRole === 'admin') {
-      setEmail('admin@nexus.com');
-      setPassword('admin123');
-    } else {
-      setEmail('user@nexus.com');
-      setPassword('user123');
-    }
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) return;
-
-    if (role === 'user' && (email !== 'user@nexus.com' || password !== 'user123')) {
-      setError('Invalid credentials! Default User: user@nexus.com / user123');
-      return;
-    }
-
-    if (role === 'admin' && (email !== 'admin@nexus.com' || password !== 'admin123')) {
-      setError('Invalid credentials! Default Admin: admin@nexus.com / admin123');
-      return;
-    }
-
     setError('');
 
-    const authData = {
-      email,
-      role,
-      token: 'fake-jwt-token-nexus',
-    };
-
-    localStorage.setItem('nexus_user', JSON.stringify(authData));
-
-    if (onLoginSuccess) {
-      onLoginSuccess(authData);
+    if (!email.trim() || !password.trim()) {
+      setError('Please fill in both email and password.');
+      return;
     }
 
-    if (role === 'admin') {
-      navigate('/admin');
-    } else {
-      navigate('/overview');
+    setLoading(true);
+
+    // Email ke hisab se dynamic role set karein taaki backend switch fail na ho
+    const computedRole = email.toLowerCase().includes('admin') ? 'admin' : 'user';
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          role: computedRole,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      // Save Token and User Info into LocalStorage
+      localStorage.setItem('nexus_token', data.token);
+      localStorage.setItem('nexus_user', JSON.stringify(data.user));
+
+      if (onLoginSuccess) {
+        onLoginSuccess(data.user);
+      }
+
+      navigate(data.user.role === 'admin' ? '/admin' : '/overview');
+    } catch (err) {
+      setError(err.message || 'Server connection failed!');
+    } finally {
+      setLoading(false);
     }
   };
+
+  const isAdminEmail = email.toLowerCase().includes('admin');
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-slate-50 flex items-center justify-center p-3 sm:p-4 font-sans">
@@ -68,18 +70,18 @@ export default function Login({ onLoginSuccess }) {
               PROJECT NEXUS
             </span>
             <h2 className="text-2xl xl:text-4xl font-extrabold mt-6 leading-tight tracking-tight">
-              {role === 'admin' ? 'Control & Manage the Platform' : 'Build what matters with the right people.'}
+              {isAdminEmail ? 'Control & Manage the Platform' : 'Build what matters with the right people.'}
             </h2>
           </div>
 
           <div className="relative z-10 pt-8">
             <div className="flex items-center gap-3 bg-white/10 p-3.5 rounded-2xl backdrop-blur-sm border border-white/10">
               <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                {role === 'admin' ? <ShieldCheck className="w-5 h-5 text-white" /> : <User className="w-5 h-5 text-white" />}
+                {isAdminEmail ? <ShieldCheck className="w-5 h-5 text-white" /> : <User className="w-5 h-5 text-white" />}
               </div>
               <div className="text-xs">
                 <p className="font-bold text-white uppercase tracking-wider">Logging in as</p>
-                <p className="text-emerald-100 capitalize font-medium">{role} Mode Active</p>
+                <p className="text-emerald-100 capitalize font-medium">{isAdminEmail ? 'admin' : 'user'} Mode Active</p>
               </div>
             </div>
           </div>
@@ -92,31 +94,6 @@ export default function Login({ onLoginSuccess }) {
             <div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">Welcome back</h1>
               <p className="text-xs sm:text-sm text-slate-400 mt-1">Please enter your credentials to continue.</p>
-            </div>
-
-            {/* Role Switcher */}
-            <div className="bg-slate-100 p-1.5 rounded-2xl flex items-center gap-1 border border-slate-200/60">
-              <button
-                type="button"
-                onClick={() => handleRoleChange('user')}
-                className={`flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  role === 'user' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
-                }`}
-              >
-                <User className="w-4 h-4 text-[#0f9f59]" />
-                <span>Login as User</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleRoleChange('admin')}
-                className={`flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  role === 'admin' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500'
-                }`}
-              >
-                <ShieldCheck className={`w-4 h-4 ${role === 'admin' ? 'text-[#0f9f59]' : 'text-slate-400'}`} />
-                <span>Login as Admin</span>
-              </button>
             </div>
 
             {error && (
@@ -133,9 +110,10 @@ export default function Login({ onLoginSuccess }) {
                   <input
                     type="email"
                     required
+                    placeholder="name@nexus.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-11 pr-4 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900"
+                    className="w-full pl-11 pr-4 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-[#0f9f59]"
                   />
                 </div>
               </div>
@@ -147,9 +125,10 @@ export default function Login({ onLoginSuccess }) {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
+                    placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-11 pr-11 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900"
+                    className="w-full pl-11 pr-11 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-[#0f9f59]"
                   />
                   <button
                     type="button"
@@ -163,10 +142,11 @@ export default function Login({ onLoginSuccess }) {
 
               <button
                 type="submit"
-                style={{ backgroundColor: role === 'admin' ? '#0f172a' : '#0f9f59' }}
-                className="w-full text-white text-sm font-bold py-3 sm:py-3.5 px-5 rounded-2xl flex items-center justify-center gap-2 mt-2 sm:mt-4 cursor-pointer"
+                disabled={loading}
+                style={{ backgroundColor: isAdminEmail ? '#0f172a' : '#0f9f59' }}
+                className="w-full text-white text-sm font-bold py-3 sm:py-3.5 px-5 rounded-2xl flex items-center justify-center gap-2 mt-2 sm:mt-4 cursor-pointer disabled:opacity-50"
               >
-                <span>Sign In as {role === 'admin' ? 'Administrator' : 'User'}</span>
+                <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>

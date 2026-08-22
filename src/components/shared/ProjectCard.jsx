@@ -1,7 +1,8 @@
+import ProjectCard from './ProjectCard';
 import React, { useState } from 'react';
 import { Bookmark } from 'lucide-react';
 
-const ProjectCard = ({ project }) => {
+export const ProjectCard = ({ project }) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   return (
@@ -10,9 +11,10 @@ const ProjectCard = ({ project }) => {
         {/* Top Header: Category Pill & Bookmark */}
         <div className="flex items-center justify-between mb-4">
           <span className="bg-emerald-50 text-[#0f9f59] text-xs font-medium px-3 py-1 rounded-full">
-            {project.category || project.industry}
+            {project?.category || project?.industry || 'General'}
           </span>
           <button 
+            type="button"
             onClick={() => setIsBookmarked(!isBookmarked)}
             className="text-slate-400 hover:text-slate-700 transition-colors p-1 cursor-pointer"
           >
@@ -22,16 +24,16 @@ const ProjectCard = ({ project }) => {
 
         {/* Project Title */}
         <h3 className="text-lg font-bold text-slate-900 group-hover:text-[#0f9f59] transition-colors mb-2">
-          {project.title}
+          {project?.title}
         </h3>
 
         {/* Description */}
         <p className="text-xs text-slate-500 leading-relaxed mb-4 line-clamp-3">
-          {project.description}
+          {project?.description}
         </p>
 
         {/* Tag Chips */}
-        {project.tags && project.tags.length > 0 && (
+        {project?.tags && project.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-2">
             {project.tags.map((tag, idx) => (
               <span key={idx} className="bg-slate-100/80 text-slate-600 text-[11px] px-2.5 py-1 rounded-lg font-medium">
@@ -45,9 +47,9 @@ const ProjectCard = ({ project }) => {
       {/* Bottom Footer: Stage/Country & Match percentage */}
       <div className="flex items-center justify-between pt-2 text-xs font-medium border-t border-slate-50">
         <span className="text-slate-400">
-          {project.stage} · {project.country}
+          {project?.stage || 'N/A'} · {project?.country || 'N/A'}
         </span>
-        {project.match && (
+        {project?.match && (
           <span className="text-[#0f9f59] font-semibold">
             {project.match}% match
           </span>

@@ -1,51 +1,66 @@
 import React, { useState, useEffect } from 'react';
-import { Bookmark } from 'lucide-react';
+import { Bookmark, Loader2 } from 'lucide-react';
+import axios from 'axios';
 import ProjectDetailCard from '../../../src/components/shared/ProjectDetailCard';
-
-const allSampleProjects = [
-  {
-    id: 1,
-    category: 'Climate & Energy',
-    title: 'OpenGrid Energy',
-    description: 'Making renewable energy accessible to every community through an open, intelligent grid.',
-    tags: ['Energy', 'Climate', 'Open source'],
-    stage: 'Prototype',
-    location: 'United Kingdom',
-    match: 94,
-  },
-  {
-    id: 2,
-    category: 'Health & Wellness',
-    title: 'MediRoute',
-    description: 'A smarter way for remote communities to access preventative healthcare and local support.',
-    tags: ['Healthcare', 'Mobile', 'Impact'],
-    stage: 'MVP',
-    location: 'Kenya',
-    match: 88,
-  },
-  {
-    id: 3,
-    category: 'Education',
-    title: 'Classroom OS',
-    description: 'The collaborative workspace helping teachers make learning more personal for every student.',
-    tags: ['EdTech', 'SaaS', 'Teachers'],
-    stage: 'Early Revenue',
-    location: 'Canada',
-    match: 82,
-  },
-];
 
 export default function SavedProjects() {
   const [selectedProject, setSelectedProject] = useState(null);
+  const [allProjects, setAllProjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [savedProjectIds, setSavedProjectIds] = useState(() => {
     const saved = localStorage.getItem('nexus_saved_projects');
-    return saved ? JSON.parse(saved) : [1]; 
+    return saved ? JSON.parse(saved) : [1];
   });
 
   useEffect(() => {
     localStorage.setItem('nexus_saved_projects', JSON.stringify(savedProjectIds));
   }, [savedProjectIds]);
+
+  // NEW: fetch real projects from backend instead of using the hardcoded
+  // allSampleProjects array. Without this, saved projects that were
+  // published dynamically (with DB-generated ids) could never be found,
+  // since they don't exist in the old static array.
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchProjects = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await axios.get('http://localhost:5000/api/projects');
+        const rows = res.data?.data || [];
+
+        const normalized = rows.map((p) => ({
+          ...p,
+          match: p.match ?? p.match_score ?? 0,
+          country: p.country ?? p.location ?? '',
+          tags: Array.isArray(p.tags)
+            ? p.tags
+            : (() => {
+                try {
+                  return JSON.parse(p.tags || '[]');
+                } catch {
+                  return [];
+                }
+              })(),
+        }));
+
+        if (isMounted) setAllProjects(normalized);
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        if (isMounted) setError('Could not load projects from server.');
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    fetchProjects();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleToggleSave = (projectOrId) => {
     const id = typeof projectOrId === 'object' ? projectOrId.id : projectOrId;
@@ -54,11 +69,8 @@ export default function SavedProjects() {
     );
   };
 
-  const savedProjects = allSampleProjects.filter((p) =>
-    savedProjectIds.includes(p.id)
-  );
+  const savedProjects = allProjects.filter((p) => savedProjectIds.includes(p.id));
 
-  // 🟢 Agar koi project click hua hai to Detail Screen dikhao
   if (selectedProject) {
     return (
       <ProjectDetailCard
@@ -92,7 +104,21 @@ export default function SavedProjects() {
             Saved projects
           </h2>
 
-          {savedProjects.length > 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border border-slate-100 bg-white p-6 h-56 animate-pulse"
+                />
+              ))}
+            </div>
+          ) : error ? (
+            <div className="border border-dashed border-red-200 rounded-2xl p-12 text-center text-sm text-red-400 bg-red-50/50 flex items-center justify-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin opacity-0" />
+              {error}
+            </div>
+          ) : savedProjects.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {savedProjects.map((project) => {
                 const isSaved = savedProjectIds.includes(project.id);
@@ -110,7 +136,7 @@ export default function SavedProjects() {
                       <button
                         type="button"
                         onClick={(e) => {
-                          e.stopPropagation(); // 🟢 Detail view open sharpen hone se rokne ke liye
+                          e.stopPropagation();
                           handleToggleSave(project.id);
                         }}
                         className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer p-1"
@@ -136,7 +162,7 @@ export default function SavedProjects() {
 
                     {/* Card Tags */}
                     <div className="flex flex-wrap gap-2 pt-1">
-                      {project.tags.map((tag, i) => (
+                      {(project.tags || []).map((tag, i) => (
                         <span
                           key={i}
                           className="bg-slate-50 text-slate-500 text-[11px] font-medium px-2.5 py-1 rounded-md"
@@ -149,7 +175,7 @@ export default function SavedProjects() {
                     {/* Card Footer */}
                     <div className="pt-4 border-t border-slate-50 flex items-center justify-between text-xs text-slate-400">
                       <span>
-                        {project.stage} · {project.location}
+                        {project.stage} · {project.country || project.location}
                       </span>
                       <span className="font-bold text-[#00a664]">
                         {project.match}% match

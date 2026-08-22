@@ -1,38 +1,61 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, ShieldCheck, KeyRound, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 
-export default function SignUp({ onSignUpSuccess }) {
+export default function SignUp() {
   const navigate = useNavigate();
-  const [role, setRole] = useState('user'); // 'user' | 'admin'
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [adminKey, setAdminKey] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!fullName.trim() || !email.trim() || !password.trim()) return;
+    setError('');
+    setSuccess('');
 
-    if (role === 'admin' && !adminKey.trim()) {
-      alert('Please enter your Secret Admin Invitation Key.');
+    if (!fullName.trim() || !email.trim() || !password.trim()) {
+      setError('Please fill in all fields.');
       return;
     }
 
-    const userData = {
-      fullName,
-      email,
-      role,
-      token: 'fake-jwt-token-nexus',
-    };
+    setLoading(true);
 
-    localStorage.setItem('nexus_user', JSON.stringify(userData));
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName,
+          email,
+          password,
+        }),
+      });
 
-    if (onSignUpSuccess) {
-      onSignUpSuccess(userData);
-    } else {
-      navigate(role === 'admin' ? '/admin' : '/overview');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      // Success message dikhayen aur form clear kar dein
+      setSuccess('Account registered successfully! Redirecting to login...');
+      setFullName('');
+      setEmail('');
+      setPassword('');
+
+      // 2 seconds ke baad login page par redirect kar dein
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+
+    } catch (err) {
+      setError(err.message || 'Something went wrong during sign up!');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,23 +70,21 @@ export default function SignUp({ onSignUpSuccess }) {
               PROJECT NEXUS
             </span>
             <h2 className="text-2xl xl:text-4xl font-extrabold mt-6 leading-tight tracking-tight">
-              {role === 'admin' ? 'Join as System Admin' : 'Start your journey with Nexus.'}
+              Start your journey with Nexus.
             </h2>
             <p className="text-emerald-100/90 text-sm mt-4 leading-relaxed font-normal">
-              {role === 'admin'
-                ? 'Create an administrative account to oversee system operations, monitor users, and control workflow metrics.'
-                : 'Join thousands of innovators building impactful tech projects, connecting with advisors, and growing.'}
+              Join thousands of innovators building impactful tech projects, connecting with advisors, and growing.
             </p>
           </div>
 
           <div className="relative z-10 pt-8">
             <div className="flex items-center gap-3 bg-white/10 p-3.5 rounded-2xl backdrop-blur-sm border border-white/10">
               <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                {role === 'admin' ? <ShieldCheck className="w-5 h-5 text-white" /> : <User className="w-5 h-5 text-white" />}
+                <User className="w-5 h-5 text-white" />
               </div>
               <div className="text-xs">
-                <p className="font-bold text-white uppercase tracking-wider">Registration Role</p>
-                <p className="text-emerald-100 capitalize font-medium">{role} Registration</p>
+                <p className="font-bold text-white uppercase tracking-wider">Account Creation</p>
+                <p className="text-emerald-100 font-medium">Standard User Account</p>
               </div>
             </div>
           </div>
@@ -73,7 +94,7 @@ export default function SignUp({ onSignUpSuccess }) {
 
         {/* Right Form Section */}
         <div className="lg:col-span-7 p-5 sm:p-8 lg:p-10 xl:p-12 flex flex-col justify-center bg-white overflow-y-auto">
-          <div className="max-w-md w-full mx-auto space-y-3 sm:space-y-4">
+          <div className="max-w-md w-full mx-auto space-y-4 sm:space-y-5">
 
             {/* Header */}
             <div>
@@ -81,43 +102,29 @@ export default function SignUp({ onSignUpSuccess }) {
                 Create an account
               </h1>
               <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                Select your account type and fill in your details.
+                Enter your details to create your Nexus user account.
               </p>
             </div>
 
-            {/* Role Switcher Filter (User vs Admin) */}
-            <div className="bg-slate-100 p-1.5 rounded-2xl flex items-center gap-1 border border-slate-200/60">
-              <button
-                type="button"
-                onClick={() => setRole('user')}
-                className={`flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  role === 'user'
-                    ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                <User className="w-4 h-4 text-[#0f9f59]" />
-                <span>Signup as User</span>
-              </button>
+            {/* Error Message */}
+            {error && (
+              <div className="p-2.5 sm:p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-semibold">
+                {error}
+              </div>
+            )}
 
-              <button
-                type="button"
-                onClick={() => setRole('admin')}
-                className={`flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  role === 'admin'
-                    ? 'bg-slate-900 text-white shadow-sm'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                <ShieldCheck className={`w-4 h-4 ${role === 'admin' ? 'text-[#0f9f59]' : 'text-slate-400'}`} />
-                <span>Signup as Admin</span>
-              </button>
-            </div>
+            {/* Success Message Banner */}
+            {success && (
+              <div className="p-3 bg-emerald-50 border border-emerald-200 text-[#0f9f59] rounded-xl text-xs font-bold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{success}</span>
+              </div>
+            )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3.5">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 sm:mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   Full Name
                 </label>
                 <div className="relative">
@@ -128,13 +135,13 @@ export default function SignUp({ onSignUpSuccess }) {
                     placeholder="Jordan Lee"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full pl-11 pr-4 py-2 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0f9f59] focus:ring-1 focus:ring-[#0f9f59] transition-all"
+                    className="w-full pl-11 pr-4 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0f9f59] transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 sm:mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   Email Address
                 </label>
                 <div className="relative">
@@ -145,13 +152,13 @@ export default function SignUp({ onSignUpSuccess }) {
                     placeholder="jordan@nexus.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-11 pr-4 py-2 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0f9f59] focus:ring-1 focus:ring-[#0f9f59] transition-all"
+                    className="w-full pl-11 pr-4 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0f9f59] transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 sm:mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   Password
                 </label>
                 <div className="relative">
@@ -162,7 +169,7 @@ export default function SignUp({ onSignUpSuccess }) {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-11 pr-11 py-2 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0f9f59] focus:ring-1 focus:ring-[#0f9f59] transition-all"
+                    className="w-full pl-11 pr-11 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0f9f59] transition-all"
                   />
                   <button
                     type="button"
@@ -174,35 +181,12 @@ export default function SignUp({ onSignUpSuccess }) {
                 </div>
               </div>
 
-              {/* Conditional Admin Secret Key Field */}
-              {role === 'admin' && (
-                <div className="animate-fadeIn">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 sm:mb-1.5">
-                    Admin Secret Key
-                  </label>
-                  <div className="relative">
-                    <KeyRound className="w-4 h-4 text-[#0f9f59] absolute left-4 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="password"
-                      required
-                      placeholder="Enter organizational admin key"
-                      value={adminKey}
-                      onChange={(e) => setAdminKey(e.target.value)}
-                      className="w-full pl-11 pr-4 py-2 sm:py-2.5 bg-emerald-50/50 border border-emerald-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0f9f59] focus:ring-1 focus:ring-[#0f9f59] transition-all"
-                    />
-                  </div>
-                  <p className="text-[11px] text-slate-400 mt-1">
-                    Required to verify administrative authorization.
-                  </p>
-                </div>
-              )}
-
               <button
                 type="submit"
-                style={{ backgroundColor: role === 'admin' ? '#0f172a' : '#0f9f59' }}
-                className="w-full text-white text-sm font-bold py-2.5 sm:py-3.5 px-5 rounded-2xl flex items-center justify-center gap-2 shadow-sm hover:opacity-95 transition-all cursor-pointer mt-1 sm:mt-2"
+                disabled={loading || !!success}
+                className="w-full bg-[#0f9f59] text-white text-sm font-bold py-3 sm:py-3.5 px-5 rounded-2xl flex items-center justify-center gap-2 shadow-sm hover:opacity-95 transition-all cursor-pointer mt-2 disabled:opacity-50"
               >
-                <span>Register as {role === 'admin' ? 'Administrator' : 'User'}</span>
+                <span>{loading ? 'Creating Account...' : 'Register Account'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>

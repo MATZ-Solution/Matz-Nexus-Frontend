@@ -1,16 +1,27 @@
-import React, { useState } from 'react';
-import PublishProjectModal from './PublishProjectModal.jsx';
-import { ProjectCard } from './ProjectCard.jsx';
-import { Sparkles } from 'lucide-react';
+  import React, { useState } from "react";
+import PublishProjectModal from "./PublishProjectModal.jsx";
+import ProjectCard from "../../../src/components/Cards/ProjectCard.jsx";
+import ProjectDetailCard from "../../../src/components/shared/ProjectDetailCard";
+import { Sparkles } from "lucide-react";
 
 export default function ProjectList() {
   const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  if (selectedProject) {
+    return (
+      <ProjectDetailCard 
+        project={selectedProject} 
+        onBackToProjects={() => setSelectedProject(null)} 
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white p-6 md:p-8 space-y-8 font-sans">
       
-      {/* 🟢 Main Title & Header Banner */}
+      {/* Header Banner */}
       <div className="flex items-start justify-between gap-4 pt-1">
         <div className="space-y-1">
           <span className="text-[11px] font-extrabold text-[#0f9f59] tracking-wider uppercase">
@@ -24,7 +35,6 @@ export default function ProjectList() {
           </p>
         </div>
 
-        {/* Top Right Green Publish Project Button */}
         <button
           onClick={() => setIsModalOpen(true)}
           style={{ backgroundColor: '#00a664', color: '#ffffff' }}
@@ -35,7 +45,7 @@ export default function ProjectList() {
         </button>
       </div>
 
-      {/* 🟢 Sub-section Header */}
+      {/* Projects Grid / Empty View */}
       <div className="space-y-5 pt-2">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-900">My projects</h2>
@@ -44,24 +54,17 @@ export default function ProjectList() {
           </button>
         </div>
 
-        {/* 🟢 Project Cards Grid / Empty Shelf View */}
         {projects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
             {projects.map((project) => (
               <ProjectCard
                 key={project.id}
-                id={project.id}
-                title={project.title}
-                description={project.description}
-                status={project.status}
-                tags={project.tags}
-                updatedAt={project.updatedAt}
-                onCardClick={(id) => console.log('Selected Project ID:', id)}
+                project={project}
+                onClick={() => setSelectedProject(project)}
               />
             ))}
           </div>
         ) : (
-          /* Empty Shelf View */
           <div className="border border-dashed border-gray-200 rounded-2xl bg-white p-12 text-center flex flex-col items-center justify-center space-y-4 min-h-[300px]">
             <div className="w-10 h-10 rounded-full bg-emerald-50 text-[#0f9f59] flex items-center justify-center">
               <Sparkles className="w-5 h-5" />
@@ -74,7 +77,6 @@ export default function ProjectList() {
                 Publish an idea and invite collaborators to help it grow.
               </p>
             </div>
-            {/* Explore projects Button */}
             <button
               onClick={() => setIsModalOpen(true)}
               style={{ backgroundColor: '#00a664', color: '#ffffff' }}
@@ -86,7 +88,6 @@ export default function ProjectList() {
         )}
       </div>
 
-      {/* 🟢 Publish Modal Component */}
       <PublishProjectModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
